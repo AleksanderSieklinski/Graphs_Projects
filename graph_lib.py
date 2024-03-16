@@ -112,24 +112,6 @@ class MyGraph:
     def addWedge(self,edge):
         self.adjacencyList[edge[0]].append(edge[1])
         self.adjacencyList[edge[1]].append(edge[0])
-    #Randomizes graph by swapping edges
-    def randomize_graph(self, num_iterations):
-        for _ in range(num_iterations):
-            edges = [(i, j) for i, neighbors in enumerate(self.adjacencyList) for j in neighbors if i < j]
-            edge1, edge2 = random.sample(edges, 2)
-            # check if the edges are not already connected
-            if edge1[1] in self.adjacencyList[edge2[0]] or edge2[1] in self.adjacencyList[edge1[0]]:
-                continue
-            self.adjacencyList[edge1[0]].remove(edge1[1])
-            self.adjacencyList[edge1[1]].remove(edge1[0])
-            self.adjacencyList[edge2[0]].remove(edge2[1])
-            self.adjacencyList[edge2[1]].remove(edge2[0])
-            self.adjacencyList[edge1[0]].append(edge2[0])
-            self.adjacencyList[edge2[0]].append(edge1[0])
-            self.adjacencyList[edge1[1]].append(edge2[1])
-            self.adjacencyList[edge2[1]].append(edge1[1])
-        self.adjacencyMatrix = MyGraph.changeRepresentation(self.adjacencyList, 1, 2)
-        self.incidenceMatrix = MyGraph.changeRepresentation(self.adjacencyList, 1, 3)
     #Generates random graph with n nodes and l edges
     def getRandomGraphNL(n,l):
         #generate all passible edges
@@ -189,7 +171,6 @@ class MyGraph:
         plt.show()
     def __str__(self):
         return f"Adjacency List:\n{self.adjacencyList}\n\nAdjacency Matrix:\n{self.adjacencyMatrix}\n\nIncidence Matrix:\n{self.incidenceMatrix}\n"
-        #Creates graph from graphical sequence and returns adjacency list
     #Constructs graph from graphical sequence and returns adjacency list
     def construct_graph_from_graphical(sequence):
         n = len(sequence)
@@ -222,6 +203,24 @@ class MyGraph:
             for i in range(1, A[0] + 1):
                 A[i] -= 1
             A[0] = 0
+    #Randomizes graph by swapping edges
+    def randomize_graph(self, num_iterations):
+        for _ in range(num_iterations):
+            edges = [(i, j) for i, neighbors in enumerate(self.adjacencyList) for j in neighbors if i < j]
+            edge1, edge2 = random.sample(edges, 2)
+            # check if the edges are not already connected
+            if edge1[1] in self.adjacencyList[edge2[0]] or edge2[1] in self.adjacencyList[edge1[0]]:
+                continue
+            self.adjacencyList[edge1[0]].remove(edge1[1])
+            self.adjacencyList[edge1[1]].remove(edge1[0])
+            self.adjacencyList[edge2[0]].remove(edge2[1])
+            self.adjacencyList[edge2[1]].remove(edge2[0])
+            self.adjacencyList[edge1[0]].append(edge2[0])
+            self.adjacencyList[edge2[0]].append(edge1[0])
+            self.adjacencyList[edge1[1]].append(edge2[1])
+            self.adjacencyList[edge2[1]].append(edge1[1])
+        self.adjacencyMatrix = MyGraph.changeRepresentation(self.adjacencyList, 1, 2)
+        self.incidenceMatrix = MyGraph.changeRepresentation(self.adjacencyList, 1, 3)
     #Returns graph center [WIP, waiting for weighted graph]
     def get_graph_center(self):
         center_node = None
