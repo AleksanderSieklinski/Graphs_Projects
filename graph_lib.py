@@ -174,6 +174,7 @@ class MyGraph:
     #Constructs graph from graphical sequence and returns adjacency list
     def construct_graph_from_graphical(sequence):
         n = len(sequence)
+        old_sequence_zero = sequence.count(0)
         adjacency_list = [[] for _ in range(n)]
         deleted = 0
         while sequence:
@@ -190,6 +191,7 @@ class MyGraph:
             for i in range(len(sequence)):
                 if sequence[i] == 0:
                     deleted += 1
+            deleted-=old_sequence_zero
         return adjacency_list
     #Checks if sequence is graphical
     def is_graphic_sequence(A):
