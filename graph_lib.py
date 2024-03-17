@@ -207,20 +207,30 @@ class MyGraph:
             A[0] = 0
     #Randomizes graph by swapping edges
     def randomize_graph(self, num_iterations):
+        print(self.adjacencyList)
         for _ in range(num_iterations):
             edges = [(i, j) for i, neighbors in enumerate(self.adjacencyList) for j in neighbors if i < j]
-            edge1, edge2 = random.sample(edges, 2)
-            # check if the edges are not already connected
-            if edge1[1] in self.adjacencyList[edge2[0]] or edge2[1] in self.adjacencyList[edge1[0]]:
-                continue
-            self.adjacencyList[edge1[0]].remove(edge1[1])
-            self.adjacencyList[edge1[1]].remove(edge1[0])
-            self.adjacencyList[edge2[0]].remove(edge2[1])
-            self.adjacencyList[edge2[1]].remove(edge2[0])
-            self.adjacencyList[edge1[0]].append(edge2[0])
-            self.adjacencyList[edge2[0]].append(edge1[0])
-            self.adjacencyList[edge1[1]].append(edge2[1])
-            self.adjacencyList[edge2[1]].append(edge1[1])
+            print(edges)
+            for _ in range(100):
+                first_edge = random.choice(edges)
+                second_edge = random.choice(edges)
+                print(first_edge, second_edge)
+                if first_edge == second_edge or first_edge[0] == second_edge[1] or first_edge[1] == second_edge[0]:
+                    continue
+                new_edge1 = (first_edge[0], second_edge[1])
+                new_edge2 = (first_edge[1], second_edge[0])
+                if new_edge1 in edges or new_edge2 in edges:
+                    continue
+                break
+            self.adjacencyList[first_edge[0]].remove(first_edge[1])
+            self.adjacencyList[first_edge[1]].remove(first_edge[0])
+            self.adjacencyList[second_edge[0]].remove(second_edge[1])
+            self.adjacencyList[second_edge[1]].remove(second_edge[0])
+            self.adjacencyList[first_edge[0]].append(second_edge[1])
+            self.adjacencyList[second_edge[1]].append(first_edge[0])
+            self.adjacencyList[first_edge[1]].append(second_edge[0])
+            self.adjacencyList[second_edge[0]].append(first_edge[1])
+        print(self.adjacencyList)
         self.adjacencyMatrix = MyGraph.changeRepresentation(self.adjacencyList, 1, 2)
         self.incidenceMatrix = MyGraph.changeRepresentation(self.adjacencyList, 1, 3)
     #Returns graph center [WIP, waiting for weighted graph]
