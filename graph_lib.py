@@ -3,6 +3,7 @@ import igraph as ig
 import networkx as nx
 import matplotlib.pyplot as plt
 import random
+from queue import Queue
 
 class MyGraph:
     #1 - Adjacency List
@@ -112,6 +113,11 @@ class MyGraph:
     def addWedge(self,edge):
         self.adjacencyList[edge[0]].append(edge[1])
         self.adjacencyList[edge[1]].append(edge[0])
+    #Deletes edge ONLY FROM adjacencyList
+    def removeEdge(self, edge):
+        self.adjacencyList[edge[0]].remove(edge[1])
+        self.adjacencyList[edge[1]].remove(edge[0])
+
     #Generates random graph with n nodes and l edges
     def getRandomGraphNL(n,l):
         #generate all passible edges
@@ -172,7 +178,7 @@ class MyGraph:
     def __str__(self):
         return f"Adjacency List:\n{self.adjacencyList}\n\nAdjacency Matrix:\n{self.adjacencyMatrix}\n\nIncidence Matrix:\n{self.incidenceMatrix}\n"
     #Constructs graph from graphical sequence and returns adjacency list
-    def construct_graph_from_graphical(sequence):
+    def constructGraphFromGraphical(sequence):
         n = len(sequence)
         old_sequence_zero = sequence.count(0)
         adjacency_list = [[] for _ in range(n)]
@@ -194,7 +200,7 @@ class MyGraph:
             deleted-=old_sequence_zero
         return adjacency_list
     #Checks if sequence is graphical
-    def is_graphic_sequence(A):
+    def isGraphicSequence(A):
         n = len(A)
         while True:
             A = sorted(A, reverse=True)
@@ -206,7 +212,7 @@ class MyGraph:
                 A[i] -= 1
             A[0] = 0
     #Randomizes graph by swapping edges
-    def randomize_graph(self, num_iterations):
+    def randomizeGraph(self, num_iterations):
         print(self.adjacencyList)
         for _ in range(num_iterations):
             edges = [(i, j) for i, neighbors in enumerate(self.adjacencyList) for j in neighbors if i < j]
@@ -234,13 +240,50 @@ class MyGraph:
         self.adjacencyMatrix = MyGraph.changeRepresentation(self.adjacencyList, 1, 2)
         self.incidenceMatrix = MyGraph.changeRepresentation(self.adjacencyList, 1, 3)
     #Returns graph center [WIP, waiting for weighted graph]
-    def get_graph_center(self):
+    def getGraphCenter(self):
         center_node = None
         return center_node
     #Returns minimax center [WIP, waiting for weighted graph]
-    def get_minimax_center(self):
+    def getMinimaxCenter(self):
         minimax_center_node = None
         return minimax_center_node
+
+
+    def divideGraphIntoConnectedComponents(self):
+        visited = np.zeros(len(self.adjacencyList))
+        q = Queue()
+        color = 0
+        index = 0
+        while(True):
+            color += 1
+            #find next unvisited node
+            index1 = np.where(visited == 0)
+            if len(index1[0]) == 0:
+                break
+            index = index1[0][0]
+            #add to queue
+            q.put(index)
+            visited[index] = color
+            while not q.empty():
+                node = q.get()
+                #add to queue all his neighbours
+                for i in self.adjacencyList[node]:
+                    if visited[i] == 0:
+                        q.put(i)
+                        visited[i] = color
+        return visited
+            
+
+
+    def findBiggestConnectedComponent(self):
+        colored = self.divideGraphIntoConnectedComponents()
+        res = np.count_nonzero(colored == 0)
+        index = 0
+        while res > 0:
+            index += 1
+            res = np.count_nonzero(colored == index)
+        return  colored, index - 1
+
 
 if __name__ == "__main__":
     #Example of usage
