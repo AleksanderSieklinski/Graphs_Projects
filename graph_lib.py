@@ -5,6 +5,25 @@ import matplotlib.pyplot as plt
 import random
 from queue import Queue
 
+class Edge:
+    def __init__(self, node1, node2, weight = 0, isDirected = False):
+        self.a = node1
+        self.b = node2
+        self.weight = weight
+        self.isDirected = isDirected
+
+    def __str__(self):
+        str = str(self.a) + " -"
+        if self.weight != 0:
+            str += str(self.weight) + "-"
+        if self.isDirected == True:
+            str += ">"
+        str += " " + str(self.b)
+        return str
+
+    def reverseEdge(self):
+        self.a, self.b = self.b, self.a
+
 class MyGraph:
     #1 - Adjacency List
     #2 - Adjacency Matrix
@@ -12,6 +31,7 @@ class MyGraph:
     #class constructor which uses one of 3 representations and fills the others
     #type1 - which type of representation is being used to create a Graph class
     def __init__(self, graph, type1):
+        self.weightMatrix = np.zeros((1,1))
         match type1:
             case 1:
                 self.adjacencyList = graph
@@ -25,6 +45,72 @@ class MyGraph:
                 self.incidenceMatrix = graph
                 self.adjacencyList = MyGraph.changeRepresentation(graph, 3, 1)
                 self.adjacencyMatrix = MyGraph.changeRepresentation(graph, 3, 2)
+            
+
+
+    def getWeight(self, a, b):
+        return self.weightMatrix(a, b)
+    
+    
+    def createAdjacencyMatrixFromAdjacencyList(graph):
+        numberOfNodes = len(graph)
+        adjacencyMatrix = np.zeros((numberOfNodes, numberOfNodes))
+        for i in range(numberOfNodes):
+            for j in graph[i]:
+                adjacencyMatrix[i][j] = 1
+                adjacencyMatrix[j][i] = 1
+        return adjacencyMatrix
+
+
+    
+    def createIncidenceMatrixFromAdjacencyList(graph):
+        numberOfNodes = len(graph)
+        numberOfEdges = int(sum([len(i) for i in graph]) / 2)
+        incidenceMatrix = np.zeros((numberOfNodes, numberOfEdges))
+        edgeIndex = 0
+        for i in range(numberOfNodes):
+            for j in graph[i]:
+                if(i < j):
+                    incidenceMatrix[i][edgeIndex] = 1
+                    incidenceMatrix[j][edgeIndex] = 1
+                    edgeIndex += 1
+        return incidenceMatrix
+
+
+    
+    def createAdjacencyListFromAdjacencyMatrix(matrix):
+        numberOfNodes = len(matrix)
+        adjacencyList = []
+        for i in range(numberOfNodes):
+            temp = []
+            for j in range(numberOfNodes):
+                if(matrix[i][j] == 1):
+                    temp.append(j)
+            adjacencyList.append(temp)
+        return adjacencyList
+
+
+    
+    def createAdjacencyListFromIncidenceMatrix(matrix):
+        numberOfNodes = len(matrix)
+        adjacencyList = []
+        for i in range(numberOfNodes):
+            adjacencyList.append([])
+        temp = []
+        for j in range(len(matrix[0])):
+            temp1 = []
+            for i in range(numberOfNodes):
+                if(matrix[i][j] == 1):
+                    temp1.append(i)
+            temp.append(temp1)
+        for i in temp:
+            if(len(i) != 2):
+                print("Incorrect Incidence Matrix")
+            adjacencyList[i[0]].append(i[1])
+            adjacencyList[i[1]].append(i[0])
+        return adjacencyList
+
+    
     #changes one graph representation to another
     def changeRepresentation(graph1, type1, type2):
         numberOfNodes = len(graph1)
@@ -32,92 +118,73 @@ class MyGraph:
             case 1:
                 match type2:
                     case 2:
-                        #we go through values in Adjacency List and based on them we add ones in Adjacency Matrix where i and j represent the connected nodes
-                        graph2 = np.zeros((numberOfNodes, numberOfNodes))
-                        for i in range(numberOfNodes):
-                            for j in graph1[i]:
-                                graph2[i][j] = 1
-                                graph2[j][i] = 1
-                        return graph2
+                        return MyGraph.createAdjacencyMatrixFromAdjacencyList(graph1)
                     case 3:
-                        #Create Incidence Matrix
-                        numberOfEdges = int(sum([len(i) for i in graph1]) / 2)
-                        graph2 = np.zeros((numberOfNodes, numberOfEdges))
-                        #fill Matrix with ones
-                        edgeIndex = 0
-                        for i in range(numberOfNodes):
-                            for j in graph1[i]:
-                                if(i < j): #to avoid repetitions we choose pairs (i, j) arranged in ascending order
-                                    graph2[i][edgeIndex] = 1
-                                    graph2[j][edgeIndex] = 1
-                                    edgeIndex += 1
-                        return graph2
+                        return MyGraph.createIncidenceMatrixFromAdjacencyList(graph1)
             case 2:
-                #convert Adjacency Matrix to Adjacency List
-                graph = []
-                for i in range(numberOfNodes):
-                    temp = []
-                    for j in range(numberOfNodes):
-                        #to make it faster we could just go through half of a matrix, but this one is easier to implement :)
-                        if(graph1[i][j] == 1):
-                            temp.append(j)
-                    graph.append(temp)
+                graph = MyGraph.createAdjacencyListFromAdjacencyMatrix(graph1)
                 match type2:
                     case 1:
                         return graph
                     case 3:
-                        #we just use the same algorithm as in case 1-3
-                        numberOfEdges = int(sum([len(i) for i in graph]) / 2)
-                        graph2 = np.zeros((numberOfNodes, numberOfEdges))
-                        edgeIndex = 0
-                        for i in range(numberOfNodes):
-                            for j in graph[i]:
-                                if(i < j):
-                                    graph2[i][edgeIndex] = 1
-                                    graph2[j][edgeIndex] = 1
-                                    edgeIndex += 1
-                        return graph2
+                        return MyGraph.createIncidenceMatrixFromAdjacencyList(graph)
             case 3:
-                #to convert Incidence Matrix into Adjacency List, we first create a list with pairs which values indicate connected nodes by that edge
-                graph = []
-                for i in range(numberOfNodes):
-                    graph.append([])
-                temp = []
-                for j in range(len(graph1[0])):
-                    temp1 = []
-                    for i in range(numberOfNodes):
-                        if(graph1[i][j] == 1):
-                            temp1.append(i)
-                    temp.append(temp1)
-                for i in temp:
-                    #we check if in incidenceMatrix there were only 2 ones in each column and then create an Adjacency List
-                    if(len(i) != 2):
-                        print("Incorrect Incidence Matrix")
-                    graph[i[0]].append(i[1])
-                    graph[i[1]].append(i[0])
+                graph = MyGraph.createAdjacencyListFromIncidenceMatrix(graph1)
                 match type2:
                     case 1:
                         return graph
                     case 2:
                         #we just use the same algorithm as in case 1-2
-                        graph2 = np.zeros((numberOfNodes, numberOfNodes))
-                        for i in range(numberOfNodes):
-                            for j in graph[i]:
-                                graph2[i][j] = 1
-                                graph2[j][i] = 1
-                        return graph2
+                        return MyGraph.createAdjacencyMatrixFromAdjacencyList(graph)
+
+
+    
     #Adds point ONLY TO adjacencyList
-    def addPoint(self):
+    def addNode(self):
         self.adjacencyList.append([])
-    #Adds wedge ONLY TO adjacencyList
-    def addWedge(self,edge):
-        self.adjacencyList[edge[0]].append(edge[1])
-        self.adjacencyList[edge[1]].append(edge[0])
+        self.weightMatrix.resize((len(self.weightMatrix) + 1,len(self.weightMatrix) + 1))
+
+    #Adds directedEdge ONLY TO adjacencyList
+    def addDirectedEdge(self, edge):
+        self.adjacencyList[edge.a].append(edge.b)
+        self.weightMatrix[edge.a,edge.b] = edge.weight
+        
+    #Adds edge ONLY TO adjacencyList
+    def addEdge(self,edge):
+        self.addDirectedEdge(edge)
+        
+        if not edge.isDirected:
+            edge.reverseEdge()
+            self.addDirectedEdge(edge)
+            edge.reverseEdge()
+
+    
+    #Deletes derectedEdge ONLY FROM adjacencyList
+    def removeDirectedEdge(self, edge):
+        self.adjacencyList[edge.a].remove(edge.b)
+        self.weightMatrix[edge.a,edge.b] = 0
+
     #Deletes edge ONLY FROM adjacencyList
     def removeEdge(self, edge):
-        self.adjacencyList[edge[0]].remove(edge[1])
-        self.adjacencyList[edge[1]].remove(edge[0])
+        self.removeDirectedEdge(edge)
+        
+        if not edge.isDirected:
+            edge.reverseEdge()
+            self.removeDirectedEdge(edge)
+            edge.reverseEdge()
 
+    def synchronizeRepresentations(self, correctRepresentation):
+        match correctRepresentation:
+            case 1:
+                self.adjacencyMatrix = MyGraph.changeRepresentation(self.adjacencyList, 1, 2)
+                self.incidenceMatrix = MyGraph.changeRepresentation(self.adjacencyList, 1, 3)
+            case 2:
+                self.adjacencyList = MyGraph.changeRepresentation(self.adjacencyMatrix, 2, 1)
+                self.incidenceMatrix = MyGraph.changeRepresentation(self.adjacencyMatrix, 2, 3)
+            case 3:
+                self.adjacencyList = MyGraph.changeRepresentation(self.incidenceMatrix, 3, 1)
+                self.adjacencyMatrix = MyGraph.changeRepresentation(self.incidenceMatrix, 3, 2)
+    
     #Generates random graph with n nodes and l edges
     def getRandomGraphNL(n,l):
         #generate all passible edges
@@ -130,13 +197,15 @@ class MyGraph:
         #Create graph by adding n nodes and l edges
         G = MyGraph([],1)
         for i in range(n):
-            G.addPoint()
+            G.addNode()
         for edge in edges:
-            G.addWedge(edge)
+            G.addEdge(edge)
         #Add othrer representations to the graph
-        G.adjacencyMatrix = MyGraph.changeRepresentation(G.adjacencyList, 1, 2)
-        G.incidenceMatrix = MyGraph.changeRepresentation(G.adjacencyList, 1, 3)
+        G.synchronizeRepresentations(1)
         return G
+    
+    
+    
     #Generates random graph with n nodes and p is propability of each edge beeing present
     def getRandomGraphNP(n,p):
         #iterate over all possible edges and add them to edge table if rondom int is bigger than propability
@@ -145,17 +214,19 @@ class MyGraph:
             for j in range(i+1,n):
                 random_float = random.random()
                 if p>=random_float:
-                    edges.append([i,j])
+                    edges.append(Edge(i,j))
         #Create graph by adding n nodes and l edges
         G = MyGraph([],1)
         for i in range(n):
-            G.addPoint()
+            G.addNode()
         for edge in edges:
-            G.addWedge(edge)
+            G.addEdge(edge)
         #Add other representations to the graph
-        G.adjacencyMatrix = MyGraph.changeRepresentation(G.adjacencyList, 1, 2)
-        G.incidenceMatrix = MyGraph.changeRepresentation(G.adjacencyList, 1, 3)
+        G.synchronizeRepresentations(1)
         return G
+    
+    
+    
     #Draws graph
     def showGraph(self):
         #get edges from adjacencyList
@@ -163,7 +234,7 @@ class MyGraph:
         for i in range(len(self.adjacencyList)):
             for j in self.adjacencyList[i]:
                 if(i < j):
-                    edges.append((i, j))
+                    edges.append(Edge(i,j))
         #construct networkx graph
         G = nx.Graph()
         for i in range(len(self.adjacencyList)):
@@ -175,8 +246,14 @@ class MyGraph:
         pos = nx.circular_layout(G)
         nx.draw(G, pos, with_labels=True, node_size=700, node_color="skyblue", font_size=8, font_color="black", font_weight="bold", edge_color="gray", linewidths=0.5)
         plt.show()
+
+
+    
     def __str__(self):
         return f"Adjacency List:\n{self.adjacencyList}\n\nAdjacency Matrix:\n{self.adjacencyMatrix}\n\nIncidence Matrix:\n{self.incidenceMatrix}\n"
+    
+        
+    
     #Constructs graph from graphical sequence and returns adjacency list
     def constructGraphFromGraphical(sequence):
         n = len(sequence)
@@ -199,6 +276,9 @@ class MyGraph:
                     deleted += 1
             deleted-=old_sequence_zero
         return adjacency_list
+
+
+    
     #Checks if sequence is graphical
     def isGraphicSequence(A):
         n = len(A)
@@ -211,6 +291,12 @@ class MyGraph:
             for i in range(1, A[0] + 1):
                 A[i] -= 1
             A[0] = 0
+
+    def swapNodesInEdges(edge1, edge2):
+        newEdge1 = (edge1.a, edge2.b)
+        newEdge2 = (edge1.b, edge2.a)
+        return newEdge1, newEdge2
+    
     #Randomizes graph by swapping edges
     def randomizeGraph(self, num_iterations):
         print(self.adjacencyList)
@@ -237,12 +323,17 @@ class MyGraph:
             self.adjacencyList[first_edge[1]].append(second_edge[0])
             self.adjacencyList[second_edge[0]].append(first_edge[1])
         print(self.adjacencyList)
-        self.adjacencyMatrix = MyGraph.changeRepresentation(self.adjacencyList, 1, 2)
-        self.incidenceMatrix = MyGraph.changeRepresentation(self.adjacencyList, 1, 3)
+        self.synchronizeRepresentations(1)
+
+
+    
     #Returns graph center [WIP, waiting for weighted graph]
     def getGraphCenter(self):
         center_node = None
         return center_node
+
+
+    
     #Returns minimax center [WIP, waiting for weighted graph]
     def getMinimaxCenter(self):
         minimax_center_node = None
@@ -260,7 +351,7 @@ class MyGraph:
             index1 = np.where(visited == 0)
             if len(index1[0]) == 0:
                 break
-            index = index1[0][0]
+            index = index1[0,0]
             #add to queue
             q.put(index)
             visited[index] = color
