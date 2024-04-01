@@ -12,6 +12,8 @@ class Edge:
         self.weight = weight
         self.isDirected = isDirected
 
+
+
     def __str__(self):
         str = str(self.a) + " -"
         if self.weight != 0:
@@ -21,6 +23,8 @@ class Edge:
         str += " " + str(self.b)
         return str
 
+
+    
     def reverseEdge(self):
         self.a, self.b = self.b, self.a
 
@@ -30,7 +34,7 @@ class MyGraph:
     #3 - Incidence Matrix
     #class constructor which uses one of 3 representations and fills the others
     #type1 - which type of representation is being used to create a Graph class
-    def __init__(self, graph, type1):
+    def __init__(self, graph = [], type1 = 1):
         self.weightMatrix = np.zeros((1,1))
         match type1:
             case 1:
@@ -50,6 +54,7 @@ class MyGraph:
 
     def getWeight(self, a, b):
         return self.weightMatrix(a, b)
+
     
     
     def createAdjacencyMatrixFromAdjacencyList(graph):
@@ -111,6 +116,7 @@ class MyGraph:
         return adjacencyList
 
     
+    
     #changes one graph representation to another
     def changeRepresentation(graph1, type1, type2):
         numberOfNodes = len(graph1)
@@ -144,11 +150,15 @@ class MyGraph:
         self.adjacencyList.append([])
         self.weightMatrix.resize((len(self.weightMatrix) + 1,len(self.weightMatrix) + 1))
 
+
+    
     #Adds directedEdge ONLY TO adjacencyList
     def addDirectedEdge(self, edge):
         self.adjacencyList[edge.a].append(edge.b)
         self.weightMatrix[edge.a,edge.b] = edge.weight
-        
+
+
+    
     #Adds edge ONLY TO adjacencyList
     def addEdge(self,edge):
         self.addDirectedEdge(edge)
@@ -158,12 +168,15 @@ class MyGraph:
             self.addDirectedEdge(edge)
             edge.reverseEdge()
 
+
     
     #Deletes derectedEdge ONLY FROM adjacencyList
     def removeDirectedEdge(self, edge):
         self.adjacencyList[edge.a].remove(edge.b)
         self.weightMatrix[edge.a,edge.b] = 0
 
+
+    
     #Deletes edge ONLY FROM adjacencyList
     def removeEdge(self, edge):
         self.removeDirectedEdge(edge)
@@ -173,6 +186,8 @@ class MyGraph:
             self.removeDirectedEdge(edge)
             edge.reverseEdge()
 
+
+    
     def synchronizeRepresentations(self, correctRepresentation):
         match correctRepresentation:
             case 1:
@@ -184,6 +199,8 @@ class MyGraph:
             case 3:
                 self.adjacencyList = MyGraph.changeRepresentation(self.incidenceMatrix, 3, 1)
                 self.adjacencyMatrix = MyGraph.changeRepresentation(self.incidenceMatrix, 3, 2)
+
+
     
     #Generates random graph with n nodes and l edges
     def getRandomGraphNL(n,l):
@@ -191,7 +208,7 @@ class MyGraph:
         possible_edges = []
         for i in range(n):
             for j in range(i+1,n):
-                possible_edges.append([i,j])
+                possible_edges.append(Edge(i,j))
         #get l edges for array
         edges = random.sample(possible_edges, l)
         #Create graph by adding n nodes and l edges
@@ -203,9 +220,60 @@ class MyGraph:
         #Add othrer representations to the graph
         G.synchronizeRepresentations(1)
         return G
+
+
     
+    def fillWeightMatrix(self):
+        visited = np.zeros(len(self.adjacencyList))
+        q = Queue()
+        color = 0
+        index = 0
+        while True:
+            index1 = np.where(visited == 0)
+            if len(index1[0]) == 0:
+                break
+            index = index1[0][0]
+            q.put(index)
+            visited[index] = 1
+            while not q.empty():
+                node = q.get()
+                for i in self.adjacencyList[node]:
+                    if visited[i] == 0:
+                        q.put(i)
+                        visited[i] = 1
+                        weight = random.randint(1, 10)
+                        self.weightMatrix[node][i] = weight
+                        if node in self.adjacencyList[i]:
+                            self.weightMatrix[i][node] = weight
+
+
     
-    
+    def getRandomConnectedGraph(n, l):
+        graph = MyGraph.getRandomGraphNL(n,l)
+        isGood = False
+        temp = 0
+        while True:
+            for i in graph.adjacencyList:
+                if i != []:
+                    temp += 1
+            if temp == len(graph.adjacencyList):
+                break
+            graph = MyGraph.getRandomGraphNL(n,l)
+            temp = 0
+        if(l < n - 1):
+            print("Naucz sie liczyć krawędzie!\nNie stworzysz z tego spójnego grafu.")
+            return graph
+        while graph.isGraphConnected() == False:
+            graph.randomizeGraph(1)
+        graph.synchronizeRepresentations(1)
+        return graph
+
+    def getRandomConnectedWeightedGraph(n, l):
+        graph = MyGraph.getRandomConnectedGraph(n, l)
+        graph.fillWeightMatrix()
+        return graph
+
+        
     #Generates random graph with n nodes and p is propability of each edge beeing present
     def getRandomGraphNP(n,p):
         #iterate over all possible edges and add them to edge table if rondom int is bigger than propability
@@ -296,21 +364,22 @@ class MyGraph:
                 A[i] -= 1
             A[0] = 0
 
+
+    
     def swapNodesInEdges(edge1, edge2):
         newEdge1 = (edge1.a, edge2.b)
         newEdge2 = (edge1.b, edge2.a)
         return newEdge1, newEdge2
+
+
     
     #Randomizes graph by swapping edges
     def randomizeGraph(self, num_iterations):
-        print(self.adjacencyList)
         for _ in range(num_iterations):
             edges = [(i, j) for i, neighbors in enumerate(self.adjacencyList) for j in neighbors if i < j]
-            print(edges)
             for _ in range(100):
                 first_edge = random.choice(edges)
                 second_edge = random.choice(edges)
-                print(first_edge, second_edge)
                 if first_edge == second_edge or first_edge[0] == second_edge[1] or first_edge[1] == second_edge[0]:
                     continue
                 new_edge1 = (first_edge[0], second_edge[1])
@@ -326,7 +395,6 @@ class MyGraph:
             self.adjacencyList[second_edge[1]].append(first_edge[0])
             self.adjacencyList[first_edge[1]].append(second_edge[0])
             self.adjacencyList[second_edge[0]].append(first_edge[1])
-        print(self.adjacencyList)
         self.synchronizeRepresentations(1)
 
 
@@ -345,28 +413,28 @@ class MyGraph:
 
 
     def divideGraphIntoConnectedComponents(self):
-        visited = np.zeros(len(self.adjacencyList))
+        colored = np.zeros(len(self.adjacencyList))
         q = Queue()
         color = 0
         index = 0
         while(True):
             color += 1
             #find next unvisited node
-            index1 = np.where(visited == 0)
+            index1 = np.where(colored == 0)
             if len(index1[0]) == 0:
                 break
-            index = index1[0,0]
+            index = index1[0][0]
             #add to queue
             q.put(index)
-            visited[index] = color
+            colored[index] = color
             while not q.empty():
                 node = q.get()
                 #add to queue all his neighbours
                 for i in self.adjacencyList[node]:
-                    if visited[i] == 0:
+                    if colored[i] == 0:
                         q.put(i)
-                        visited[i] = color
-        return visited
+                        colored[i] = color
+        return colored
             
 
 
@@ -379,6 +447,15 @@ class MyGraph:
             res = np.count_nonzero(colored == index)
         return  colored, index - 1
     
+
+    def isGraphConnected(self):
+        colored = self.divideGraphIntoConnectedComponents()
+        firstColor = colored[0]
+        for i in colored:
+            if i != firstColor:
+                return False
+        return True
+        
     
     def generateKRegularGraph(n, k): # n - number of vertices, k - degree
         if n <= k:
