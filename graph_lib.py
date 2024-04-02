@@ -35,6 +35,7 @@ class MyGraph:
     #class constructor which uses one of 3 representations and fills the others
     #type1 - which type of representation is being used to create a Graph class
     def __init__(self, graph = [], type1 = 1):
+        self.graph = {}
         self.weightMatrix = np.zeros((1,1))
         match type1:
             case 1:
@@ -398,20 +399,6 @@ class MyGraph:
         self.synchronizeRepresentations(1)
 
 
-    
-    #Returns graph center [WIP, waiting for weighted graph]
-    def getGraphCenter(self):
-        center_node = None
-        return center_node
-
-
-    
-    #Returns minimax center [WIP, waiting for weighted graph]
-    def getMinimaxCenter(self):
-        minimax_center_node = None
-        return minimax_center_node
-
-
     def divideGraphIntoConnectedComponents(self):
         colored = np.zeros(len(self.adjacencyList))
         q = Queue()
@@ -491,7 +478,8 @@ class MyGraph:
 
 if __name__ == "__main__":
     #Example of usage
-    G = MyGraph([[1, 2], [0, 2], [0, 1, 3], [2, 4], [3]], 1)
-    print(G)
-    G.showGraph()
-    B = MyGraph.getRandomGraphNP(6,0.2)
+    G = MyGraph()
+    B = MyGraph.getRandomConnectedWeightedGraph(5, 4)
+    B.showGraph()
+    print(G.getGraphCenter())
+    print(G.getMinimaxCenter())
