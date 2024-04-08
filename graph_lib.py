@@ -57,6 +57,8 @@ class MyGraph:
         return self.weightMatrix(a, b)
 
     
+    def getWeightMatrix(self):
+        return self.weightMatrix
     
     def createAdjacencyMatrixFromAdjacencyList(graph):
         numberOfNodes = len(graph)
@@ -109,14 +111,26 @@ class MyGraph:
                 if(matrix[i][j] == 1):
                     temp1.append(i)
             temp.append(temp1)
+
         for i in temp:
             if(len(i) != 2):
                 print("Incorrect Incidence Matrix")
-            adjacencyList[i[0]].append(i[1])
-            adjacencyList[i[1]].append(i[0])
+            try:
+                adjacencyList[i[0]].append(i[1])
+                adjacencyList[i[1]].append(i[0])
+            except:
+                pass
         return adjacencyList
 
-    
+    #TODO: bugfix     
+    def syncWeightMatrixWithIncidenceMatrix(self, w_matrix): 
+        self.weightMatrix = w_matrix
+        self.incidenceMatrix = np.zeros((len(w_matrix), len(w_matrix[0])))
+        for i in range(len(w_matrix)):
+            for j in range(len(w_matrix[i])):
+                if w_matrix[i][j] > 0:
+                    self.incidenceMatrix[i][j] = 1
+        self.synchronizeRepresentations(3)   # doesn't work properly i guess 
     
     #changes one graph representation to another
     def changeRepresentation(graph1, type1, type2):
@@ -269,7 +283,13 @@ class MyGraph:
         graph.synchronizeRepresentations(1)
         return graph
 
-    def getRandomConnectedWeightedGraph(n, l):
+    def getRandomConnectedWeightedGraph(n, l): 
+        graph = MyGraph.getRandomConnectedGraph(n, l)
+        graph.fillWeightMatrix()
+        return graph
+    
+    @staticmethod
+    def getRandomConnectedWeightedGraph(n, l): 
         graph = MyGraph.getRandomConnectedGraph(n, l)
         graph.fillWeightMatrix()
         return graph
@@ -480,6 +500,4 @@ if __name__ == "__main__":
     #Example of usage
     G = MyGraph()
     B = MyGraph.getRandomConnectedWeightedGraph(5, 4)
-    B.showGraph()
-    print(G.getGraphCenter())
-    print(G.getMinimaxCenter())
+    B.showGraph('graph.png')
