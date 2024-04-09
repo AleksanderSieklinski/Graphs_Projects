@@ -114,15 +114,14 @@ class MyGraph:
 
         for i in temp:
             if(len(i) != 2):
-                print("Incorrect Incidence Matrix")
+                print("Incorrect Incidence Matrix:",i)
             try:
                 adjacencyList[i[0]].append(i[1])
                 adjacencyList[i[1]].append(i[0])
             except:
                 pass
         return adjacencyList
-
-    #TODO: bugfix     
+    
     def syncWeightMatrixWithIncidenceMatrix(self, w_matrix): 
         self.weightMatrix = w_matrix
         self.incidenceMatrix = np.zeros((len(w_matrix), len(w_matrix[0])))
@@ -130,7 +129,7 @@ class MyGraph:
             for j in range(len(w_matrix[i])):
                 if w_matrix[i][j] > 0:
                     self.incidenceMatrix[i][j] = 1
-        self.synchronizeRepresentations(3)   # doesn't work properly i guess 
+        self.synchronizeRepresentations(3)  
     
     #changes one graph representation to another
     def changeRepresentation(graph1, type1, type2):
@@ -293,7 +292,7 @@ class MyGraph:
         graph = MyGraph.getRandomConnectedGraph(n, l)
         graph.fillWeightMatrix()
         return graph
-
+    
         
     #Generates random graph with n nodes and p is propability of each edge beeing present
     def getRandomGraphNP(n,p):
@@ -334,6 +333,31 @@ class MyGraph:
         #set layout and draw graph with specified parameters
         pos = nx.circular_layout(G)
         nx.draw(G, pos, with_labels=True, node_size=700, node_color="skyblue", font_size=8, font_color="black", font_weight="bold", edge_color="gray", linewidths=0.5)
+        if filename != None:
+            plt.savefig(filename)
+            plt.close()
+        else:
+            plt.show()
+
+    def showWeightedGraph(self, filename = None):
+        #get edges from adjacencyList
+        edges = []
+        for i in range(len(self.adjacencyList)):
+            for j in self.adjacencyList[i]:
+                if(i < j):
+                    edges.append(Edge(i,j))
+        #construct networkx graph
+        G = nx.Graph()
+        for i in range(len(self.adjacencyList)):
+            G.add_node(i)
+        for i in range(len(self.adjacencyList)):
+            for neighbor in self.adjacencyList[i]:
+                G.add_edge(i, neighbor, weight = self.weightMatrix[i][neighbor])
+        #set layout and draw graph with specified parameters
+        pos = nx.circular_layout(G)
+        nx.draw(G, pos, with_labels=True, node_size=700, node_color="skyblue", font_size=8, font_color="black", font_weight="bold", edge_color="gray", linewidths=0.5)
+        labels = nx.get_edge_attributes(G, 'weight')
+        nx.draw_networkx_edge_labels(G, pos, edge_labels=labels)
         if filename != None:
             plt.savefig(filename)
             plt.close()

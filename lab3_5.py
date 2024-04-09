@@ -3,10 +3,18 @@ import matplotlib.pyplot as plt
 import graph_lib as gl
 import numpy as np
 
+def getNumberOfEdgesFromMatrix(matrix):
+	edges = 0
+	for i in range(len(matrix)):
+		for j in range(i, len(matrix)):
+			if matrix[i][j] != 0:
+				edges += 1
+	return edges
 
 def kruskal_algorithm(graph):
 	
 	matrix = graph.getWeightMatrix()
+	node = len(matrix)
 	edges = [] # krawedzie w postaci (v1, v2, waga)
 	nodes = {} # para (wierzcholek, kolor)
 	color = 0
@@ -19,6 +27,7 @@ def kruskal_algorithm(graph):
 				nodes[j] = color
 
 	edges.sort(key=lambda x: x[2]) # sortujemy krawedzie po wagach
+	print("ilosć wierzchołków: ", node)
 	print("macierz: ", matrix)
 	print("kolory: ", nodes)
 	print("kraw: ", edges)
@@ -33,7 +42,9 @@ def kruskal_algorithm(graph):
 
 	for edg in edges:
 		#jeśli wierzchołek nie ma jeszcze koloru - (0)
-		print(nodes)
+		print(edges)
+		if getNumberOfEdgesFromMatrix(matrixSpanningTree) == node :# should be node - 1 but check matrixSpanningTree size
+			break
 		if nodes[edg[0]] == 0 and nodes[edg[1]] == 0:
 			color += 1
 			nodes[edg[0]] = color
@@ -64,7 +75,6 @@ def kruskal_algorithm(graph):
 	# return grapgSpanningTree
 	
 if __name__ == '__main__':
-	# tworzymy graf
-	graph = gl.MyGraph.getRandomConnectedWeightedGraph(6,9)
-	graph.showGraph('test.png')
+	graph = gl.MyGraph.getRandomConnectedWeightedGraph(9, 9)
+	graph.showWeightedGraph('test.png')
 	kruskal_algorithm(graph)
