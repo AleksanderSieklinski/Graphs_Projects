@@ -253,7 +253,7 @@ class MyGraph:
             while not q.empty():
                 node = q.get()
                 for i in self.adjacencyList[node]:
-                    if visited[i] == 0:
+                    if self.weightMatrix[node][i] == 0:
                         q.put(i)
                         visited[i] = 1
                         weight = random.randint(1, 10)
