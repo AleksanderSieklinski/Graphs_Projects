@@ -368,34 +368,48 @@ class MyGraph:
     
     def __str__(self):
         return f"Adjacency List:\n{self.adjacencyList}\n\nAdjacency Matrix:\n{self.adjacencyMatrix}\n\nIncidence Matrix:\n{self.incidenceMatrix}\n"
-    
-        
-    
+          
     #Constructs graph from graphical sequence and returns adjacency list
     def constructGraphFromGraphical(sequence):
         n = len(sequence)
-        old_sequence_zero = sequence.count(0)
         adjacency_list = [[] for _ in range(n)]
-        deleted = 0
+        active_nodes = list(range(n))  # list of active nodes
+        degrees = [0] * n  # list of degrees of nodes
+        start_sequence = sequence.copy()
+        check_start = 0
         while sequence:
             sequence = sorted(sequence, reverse=True)
-
+            print()
+            print("Active nodes:")
+            print(active_nodes)
+            print("Sequence:")
+            print(sequence)
+            print("Degrees:")
+            print(degrees)
             if sequence[0] == 0:
                 break
+            while degrees[0] >= start_sequence[check_start]:
+                active_nodes.pop(0)
+                degrees.pop(0)
+                check_start += 1
             for i in range(1, sequence[0] + 1):
-                sequence[i] -= 1
-                adjacency_list[deleted].append(i + deleted)
-                adjacency_list[i + deleted].append(deleted)
+                # Find a node that has room for another connection
+                for j in range(i, len(active_nodes)):
+                    if degrees[j] < start_sequence[j+check_start]:
+                        sequence[j] -= 1
+                        degrees[j] += 1
+                        degrees[0] += 1
+                        adjacency_list[active_nodes[0]].append(active_nodes[j])
+                        adjacency_list[active_nodes[j]].append(active_nodes[0])
+                        break
+                else:
+                    return None  # Return None if no node has room for another connection
             sequence[0] = 0
-            deleted =0
-            for i in range(len(sequence)):
-                if sequence[i] == 0:
-                    deleted += 1
-            deleted-=old_sequence_zero
+            active_nodes.pop(0)  # remove the node from the active list
+            degrees.pop(0)  # remove the degree of the processed node
+            check_start += 1
         return adjacency_list
 
-
-    
     #Checks if sequence is graphical
     def isGraphicSequence(A):
         n = len(A)
