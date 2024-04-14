@@ -1,5 +1,3 @@
-import random
-import networkx as nx
 import graph_lib as l1
 def main():
     G = l1.MyGraph.getRandomGraphNP(6, 0.3)
