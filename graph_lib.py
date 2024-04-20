@@ -6,7 +6,7 @@ import random
 from queue import Queue
 import heapq
 from itertools import permutations
-
+    
 class Edge:
     def __init__(self, node1, node2, weight = 0, isDirected = False):
         self.a = node1
@@ -160,23 +160,95 @@ class MyGraph:
                         return MyGraph.createAdjacencyMatrixFromAdjacencyList(graph)
 
 
+    #check if first and last vertex are connected ( and all others)
     def is_hamiltonian_cycle(self, path):
-        n = len(path)
-        if path[0] not in self.adjacencyList[path[n-1]]:
+        if path[0] not in self.adjacencyList[path[-1]]:
             return False
 
-        for i in range(n-1):
-            if path[i+1] not in self.adjacencyList[path[i]]:
+        for i in range(len(path) - 1):
+            if path[i + 1] not in self.adjacencyList[path[i]]:
                 return False
         return True
+    
 
+    # If the path includes all vertices and returns to the start, it's a cycle
+    def find_hamiltonian_cycle_util(self, path, visited):
+        if len(path) == len(self.adjacencyList) and self.is_hamiltonian_cycle(path):
+            return path + [path[0]]
+
+        for vertex in self.adjacencyList[path[-1]]:
+            if not visited[vertex]:
+                visited[vertex] = True
+                path.append(vertex)
+
+                cycle = self.find_hamiltonian_cycle_util(path, visited)
+                if cycle:
+                    return cycle
+
+                visited[vertex] = False
+                path.pop()
+
+        return None
+
+    #if there is a hamiltonian cycle in the graph, it returns the cycle, otherwise it returns None
     def find_hamiltonian_cycle(self):
         n = len(self.adjacencyList)
-        for path in permutations(range(n)):
-            if self.is_hamiltonian_cycle(path):
-                return path
+        for start_vertex in range(n):
+            path = [start_vertex]
+            visited = [False] * n
+            visited[start_vertex] = True
+
+            cycle = self.find_hamiltonian_cycle_util(path, visited)
+            if cycle:
+                return cycle
+
         return None
     
+    #djikstra algorithm
+    def dijkstra(self, src):
+        import sys
+        num_vertices = len(self.adjacencyList)
+        dist = [sys.maxsize] * num_vertices
+        dist[src] = 0
+        prev = [None] * num_vertices 
+        pq = [(0, src)]
+        visited = set()
+
+        while pq:
+            current_distance, u = heapq.heappop(pq)
+            if u in visited:
+                continue
+            visited.add(u)
+
+            for v in self.adjacencyList[u]:
+                weight = self.weightMatrix[u][v]
+                if v not in visited and dist[v] > dist[u] + weight:
+                    dist[v] = dist[u] + weight
+                    prev[v] = u
+                    heapq.heappush(pq, (dist[v], v))
+
+
+        paths = []
+        for vertex in range(num_vertices):
+            path = []
+            step = vertex
+            if dist[step] != sys.maxsize:
+                while step is not None:
+                    path.append(step)
+                    step = prev[step]
+                path.reverse() 
+            paths.append((vertex, path, dist[vertex]))
+        return paths
+    
+
+    #returns all pairs of shortest paths
+    def all_pairs_shortest_path(self, n):
+        distance_matrix = []
+        for src in range(n):
+            distance_matrix.append(self.dijkstra(src))
+        return distance_matrix
+
+
     #Adds point ONLY TO adjacencyList
     def addNode(self):
         self.adjacencyList.append([])
