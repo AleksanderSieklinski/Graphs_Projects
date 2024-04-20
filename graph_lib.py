@@ -4,6 +4,8 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import random
 from queue import Queue
+import heapq
+from itertools import permutations
 
 class Edge:
     def __init__(self, node1, node2, weight = 0, isDirected = False):
@@ -158,6 +160,22 @@ class MyGraph:
                         return MyGraph.createAdjacencyMatrixFromAdjacencyList(graph)
 
 
+    def is_hamiltonian_cycle(self, path):
+        n = len(path)
+        if path[0] not in self.adjacencyList[path[n-1]]:
+            return False
+
+        for i in range(n-1):
+            if path[i+1] not in self.adjacencyList[path[i]]:
+                return False
+        return True
+
+    def find_hamiltonian_cycle(self):
+        n = len(self.adjacencyList)
+        for path in permutations(range(n)):
+            if self.is_hamiltonian_cycle(path):
+                return path
+        return None
     
     #Adds point ONLY TO adjacencyList
     def addNode(self):
