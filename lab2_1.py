@@ -1,8 +1,8 @@
 import graph_lib as l1
 def main():
-    sequence = [2,2,2,0]
-    if l1.MyGraph.is_graphic_sequence(sequence):
-        adjacency_list = l1.MyGraph.construct_graph_from_graphical(sequence)
+    sequence = [4,3,3,2,2,1,1]
+    if l1.MyGraph.isGraphicSequence(sequence):
+        adjacency_list = l1.MyGraph.constructGraphFromGraphical(sequence)
         if adjacency_list is not None:
             G = l1.MyGraph(adjacency_list, 1)
             G.showGraph()

@@ -4,7 +4,9 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import random
 from queue import Queue
-
+import heapq
+from itertools import permutations
+    
 class Edge:
     def __init__(self, node1, node2, weight = 0, isDirected = False):
         self.a = node1
@@ -158,7 +160,95 @@ class MyGraph:
                         return MyGraph.createAdjacencyMatrixFromAdjacencyList(graph)
 
 
+    #check if first and last vertex are connected ( and all others)
+    def is_hamiltonian_cycle(self, path):
+        if path[0] not in self.adjacencyList[path[-1]]:
+            return False
+
+        for i in range(len(path) - 1):
+            if path[i + 1] not in self.adjacencyList[path[i]]:
+                return False
+        return True
     
+
+    # If the path includes all vertices and returns to the start, it's a cycle
+    def find_hamiltonian_cycle_util(self, path, visited):
+        if len(path) == len(self.adjacencyList) and self.is_hamiltonian_cycle(path):
+            return path + [path[0]]
+
+        for vertex in self.adjacencyList[path[-1]]:
+            if not visited[vertex]:
+                visited[vertex] = True
+                path.append(vertex)
+
+                cycle = self.find_hamiltonian_cycle_util(path, visited)
+                if cycle:
+                    return cycle
+
+                visited[vertex] = False
+                path.pop()
+
+        return None
+
+    #if there is a hamiltonian cycle in the graph, it returns the cycle, otherwise it returns None
+    def find_hamiltonian_cycle(self):
+        n = len(self.adjacencyList)
+        for start_vertex in range(n):
+            path = [start_vertex]
+            visited = [False] * n
+            visited[start_vertex] = True
+
+            cycle = self.find_hamiltonian_cycle_util(path, visited)
+            if cycle:
+                return cycle
+
+        return None
+    
+    #djikstra algorithm
+    def dijkstra(self, src):
+        import sys
+        num_vertices = len(self.adjacencyList)
+        dist = [sys.maxsize] * num_vertices
+        dist[src] = 0
+        prev = [None] * num_vertices 
+        pq = [(0, src)]
+        visited = set()
+
+        while pq:
+            current_distance, u = heapq.heappop(pq)
+            if u in visited:
+                continue
+            visited.add(u)
+
+            for v in self.adjacencyList[u]:
+                weight = self.weightMatrix[u][v]
+                if v not in visited and dist[v] > dist[u] + weight:
+                    dist[v] = dist[u] + weight
+                    prev[v] = u
+                    heapq.heappush(pq, (dist[v], v))
+
+
+        paths = []
+        for vertex in range(num_vertices):
+            path = []
+            step = vertex
+            if dist[step] != sys.maxsize:
+                while step is not None:
+                    path.append(step)
+                    step = prev[step]
+                path.reverse() 
+            paths.append((vertex, path, dist[vertex]))
+        return paths
+    
+
+    #returns all pairs of shortest paths
+    def all_pairs_shortest_path(self, n):
+        distance_matrix = []
+        for src in range(n):
+            distance_matrix.append(self.dijkstra(src))
+        return distance_matrix
+
+
     #Adds point ONLY TO adjacencyList
     def addNode(self):
         self.adjacencyList.append([])
@@ -368,34 +458,48 @@ class MyGraph:
     
     def __str__(self):
         return f"Adjacency List:\n{self.adjacencyList}\n\nAdjacency Matrix:\n{self.adjacencyMatrix}\n\nIncidence Matrix:\n{self.incidenceMatrix}\n"
-    
-        
-    
+          
     #Constructs graph from graphical sequence and returns adjacency list
     def constructGraphFromGraphical(sequence):
         n = len(sequence)
-        old_sequence_zero = sequence.count(0)
         adjacency_list = [[] for _ in range(n)]
-        deleted = 0
+        active_nodes = list(range(n))  # list of active nodes
+        degrees = [0] * n  # list of degrees of nodes
+        start_sequence = sequence.copy()
+        check_start = 0
         while sequence:
             sequence = sorted(sequence, reverse=True)
-
+            print()
+            print("Active nodes:")
+            print(active_nodes)
+            print("Sequence:")
+            print(sequence)
+            print("Degrees:")
+            print(degrees)
             if sequence[0] == 0:
                 break
+            while degrees[0] >= start_sequence[check_start]:
+                active_nodes.pop(0)
+                degrees.pop(0)
+                check_start += 1
             for i in range(1, sequence[0] + 1):
-                sequence[i] -= 1
-                adjacency_list[deleted].append(i + deleted)
-                adjacency_list[i + deleted].append(deleted)
+                # Find a node that has room for another connection
+                for j in range(i, len(active_nodes)):
+                    if degrees[j] < start_sequence[j+check_start]:
+                        sequence[j] -= 1
+                        degrees[j] += 1
+                        degrees[0] += 1
+                        adjacency_list[active_nodes[0]].append(active_nodes[j])
+                        adjacency_list[active_nodes[j]].append(active_nodes[0])
+                        break
+                else:
+                    return None  # Return None if no node has room for another connection
             sequence[0] = 0
-            deleted =0
-            for i in range(len(sequence)):
-                if sequence[i] == 0:
-                    deleted += 1
-            deleted-=old_sequence_zero
+            active_nodes.pop(0)  # remove the node from the active list
+            degrees.pop(0)  # remove the degree of the processed node
+            check_start += 1
         return adjacency_list
 
-
-    
     #Checks if sequence is graphical
     def isGraphicSequence(A):
         n = len(A)
