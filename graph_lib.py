@@ -575,12 +575,17 @@ class MyGraph:
 
     def findBiggestConnectedComponent(self):
         colored = self.divideGraphIntoConnectedComponents()
-        res = np.count_nonzero(colored == 0)
-        index = 0
+        res = np.count_nonzero(colored == 1)
+        maxIndex = 1
+        index = 1
+        maxRes = res
         while res > 0:
             index += 1
             res = np.count_nonzero(colored == index)
-        return  colored, index - 1
+            if(maxRes < res):
+                maxRes = res
+                maxIndex = index
+        return  colored, maxIndex
     
 
     def isGraphConnected(self):
