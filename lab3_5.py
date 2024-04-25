@@ -75,6 +75,6 @@ def kruskal_algorithm(graph):
 	# return grapgSpanningTree
 	
 if __name__ == '__main__':
-	graph = gl.MyGraph.getRandomConnectedWeightedGraph(9, 9)
+	graph = gl.MyGraph([])
 	graph.showWeightedGraph('test.png')
 	kruskal_algorithm(graph)

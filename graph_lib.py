@@ -486,37 +486,45 @@ class MyGraph:
             if i != firstColor:
                 return False
         return True
-        
     
-    def generateKRegularGraph(n, k): # n - number of vertices, k - degree
-        if n <= k:
-            raise Exception("n must be greater than k")
-        if k * n % 2 != 0:
-            raise Exception("k * n must be even")
 
+    # generuje losowy graf k-regularny
+    # algorytm działa na podobnej zasadzie co tworzenie ciągu graficznego
+    @staticmethod
+    def generateKRegularGraph(n, k, ind = 0): # n - ilość krawędzi, k - stopień, ind - randomizacja
+        if n <= k:
+            raise ValueError("n musi być większe od k (ilość wierchołków > stopień)!")
+        if k * n % 2 != 0:
+            raise ValueError("k*n musi być parzyste!")
         
-        # degree sequence
+        # sekwencja stopni wierzchołków, przechowuje info
+        # o stopniach wierzchołków, które są jeszcze do dodania
         degreeSequence = [[i, k] for i in range(n)] # i - vertex, k - degree of vertex
         adjList = [[] for i in degreeSequence]
-        # print(degreeSequence)
         
-
+        # start from full graph
         while True:
+            print(degreeSequence)
             # check if all degrees in degreeSequence are equal to k
-            if all(i[1] == 0 for i in degreeSequence):
-                break
+            if all(i[1] == 0 for i in degreeSequence): 
+                break # if all degrees in degreeSequence are 0, then we have a k-regular graph
             for i in range(1, degreeSequence[0][1] + 1):
                 degreeSequence[i][1] -= 1
+
                 # add an edge between vertices a and b
                 a = degreeSequence[0][0]
                 b = degreeSequence[i][0]
                 adjList[a].append(b)    
-                adjList[b].append(a)        
+                adjList[b].append(a)   
+                     
             
-            degreeSequence[0][1] = 0
-            degreeSequence.sort(reverse=True, key=lambda x: x[1])
+            degreeSequence[0][1] = 0 
+            degreeSequence.sort(reverse=True, key=lambda x: x[1]) # sort by degree, descending
         g = MyGraph(adjList, 1)
-        # g.randomizeGraph(1)
+        
+        if ind > 0:
+            for j in range(i):
+                g.randomizeGraph(1)
         return g
 
 

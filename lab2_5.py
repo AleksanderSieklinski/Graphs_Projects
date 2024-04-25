@@ -1,9 +1,8 @@
 from graph_lib import MyGraph
+ 
+nValue = 10 # number of vertices
+kValue = 5 # degree
 
-if __name__ == "__main__":
-    nValue = 4  # number of vertices
-    kValue = 3  # degree
-    
-    generatedGraph = MyGraph.generateKRegularGraph(nValue, kValue)
-    if generatedGraph is not None:
-        generatedGraph.showGraph("kRegularGraphRandom.png")
+generatedGraph = MyGraph.generateKRegularGraph(nValue, kValue, 0)
+if generatedGraph is not None:
+    generatedGraph.showGraph("kReg.png")
