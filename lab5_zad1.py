@@ -2,9 +2,13 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import random
 
-# random.seed(42)
 
-def createFlowNetwork(N):
+# function that creates flow network, with N clusters, each cluster has random number of nodes from 2 to N
+# returns: flow network, matrix of capacities, source, sink, list of nodes in each cluster
+# sink and source are first and last node in the list of nodes
+def createFlowNetwork(N, displayBasicFlowNetwork=False):
+    if N < 2 or N > 5:
+        raise ValueError("N must be greater than 1 and less than 5.")
     sizesOfClusters = [1] # source 
 
     for _ in range(N):
@@ -51,18 +55,15 @@ def createFlowNetwork(N):
 
         edges_to_add = 2*N
 
-
-    # adding additional random edges (2nd step)
     j = 0
-    graph_visualization(G, nodes, 'lab5_zad1_podst_siatka.png')
+    if displayBasicFlowNetwork:
+        displayFlowNetwork(G, nodes, 'lab5_zad1_podst_siatka.png')
+    # adding additional random edges (2nd step)
     while j < edges_to_add:
         #choose random cluster
-        choosenCluster1 = random.randrange(1,N + 1)
-        choosenCluster2 = None
-        while True:
-            choosenCluster2 =  choosenCluster1 + random.choice([-1, 0, 1])
-            if choosenCluster2 > 0 and choosenCluster2 < N+1:
-                break
+        # choosenCluster1 = random.randrange(1,N + 1)
+        choosenCluster1 = random.randrange(0, N + 1)
+        choosenCluster2 = random.randrange(1, N + 2)
 
         #choose random nodes from choosen clusters
         choosenNodeFrom = random.randrange(0,len(nodes[choosenCluster1]))
@@ -74,8 +75,9 @@ def createFlowNetwork(N):
         if not G.has_edge(nodes[choosenCluster1][choosenNodeFrom], nodes[choosenCluster2][choosenNodeTo]) and not G.has_edge(nodes[choosenCluster2][choosenNodeTo], nodes[choosenCluster1][choosenNodeFrom]):
             G.add_edge(nodes[choosenCluster1][choosenNodeFrom], nodes[choosenCluster2][choosenNodeTo], capacity=random.randrange(1,11))
             j += 1
+            print("Added edge between: ", nodes[choosenCluster1][choosenNodeFrom], nodes[choosenCluster2][choosenNodeTo])
 
-    # create matrix of capacities
+    # create matrix of capacities (needed for 2nd task)
     matrix = nx.adjacency_matrix(G).todense()
     for i in range(len(matrix)):
         for j in range(len(matrix[i])):
@@ -85,21 +87,30 @@ def createFlowNetwork(N):
 
     return G, matrix, nodes[0], nodes[-1], nodes
 
-def graph_visualization(G, nodes, name):
+def displayFlowNetwork(G, clustersList, name):
     positions = {}
-    for i in range(len(nodes)):
-        for j in range(len(nodes[i])):
-            positions[nodes[i][j]] = (i*2,j*(-2))
+    maxClusterSize = max([len(i) for i in clustersList])
+    for i in range(len(clustersList)):
+        for j in range(len(clustersList[i])):
+            if i % 2 == 0:
+                positions[clustersList[i][j]] = (i*2,j*(-2))
+            else:
+                positions[clustersList[i][j]] = (i*2,j*(-2)+maxClusterSize/3)
+    positions[clustersList[0][0]] = (0,-maxClusterSize/2)
+    positions[clustersList[-1][-1]] = (len(clustersList)*2,-maxClusterSize/2)
+
+    figsize = (len(clustersList) * 2, len(clustersList)*2)
+    plt.figure(figsize=figsize)
     nx.draw_networkx(G, positions)
     labels = nx.get_edge_attributes(G, "capacity")
     nx.draw_networkx_edge_labels(G, positions, labels, label_pos=0.6)
     plt.savefig(name)
     
 if __name__ == '__main__':
-    N = 3
-    G, cappacity_matrix, source, sink, listOfClusters  = createFlowNetwork(N)
+    N = 2
+    G, cappacity_matrix, source, sink, listOfClusters  = createFlowNetwork(N, True)
     print("Source: ", source)
     print("Sink: ", sink)
     print("Matrix: \n", cappacity_matrix)
 
-    graph_visualization(G, listOfClusters, 'lab5_zad1.png')
+    displayFlowNetwork(G, listOfClusters, 'lab5_zad1.png')

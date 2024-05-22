@@ -2,10 +2,9 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
 
-def generate_random_strongly_connected_digraph(n, K): # n - liczba wierzchołków, k - liczba krawędzi
-	# sprawdź czy K >= n i czy K <= n(n-1)
+def generateRandomStronglyConnectedDigraph(n, K): # n - liczba wierzchołków, k - liczba krawędzi
 	if K < n or K > n * (n-1):
-		raise ValueError("Nieprawidłowa liczba krawędzi")
+		raise ValueError("Invalid number of edges. Must be between n and n*(n-1)")
 	
 	g = nx.DiGraph()
 	g.add_nodes_from(range(n))
@@ -14,9 +13,9 @@ def generate_random_strongly_connected_digraph(n, K): # n - liczba wierzchołkó
 	vertices = list(g.nodes)
 	np.random.shuffle(vertices)
 	for a, b in zip(vertices[:len(vertices)-1], vertices[1:]):
-		# add edge from a to b with random weight between -5 and 10
-		g.add_edge(a, b, weight=np.random.randint(-5, 11))
-	g.add_edge(vertices[-1], vertices[0], weight=np.random.randint(-5, 11))
+		# add edge from a to b with random weight between -4 and 11
+		g.add_edge(a, b, weight=np.random.randint(-4, 12))
+	g.add_edge(vertices[-1], vertices[0], weight=np.random.randint(-4, 12))
 
 	# calculate how many edges we still need to add
 	K -= g.number_of_edges()
@@ -26,13 +25,13 @@ def generate_random_strongly_connected_digraph(n, K): # n - liczba wierzchołkó
 		a = np.random.choice(vertices)
 		b = np.random.choice(vertices)
 		if a != b and not g.has_edge(a, b):
-			g.add_edge(a, b, weight=np.random.randint(-5, 11))
+			g.add_edge(a, b, weight=np.random.randint(-4, 12))
 			K -= 1
 
 	return g
 
 
-def bellman_ford(g, source):
+def bellmanFord(g, source):
 	v = list(g.nodes)
 	v = {vi: [np.inf, None] for vi in v}  # (Vertex, Distance, Predecessor)
 	edges = list(g.edges(data=True)) # list of edges with weights
@@ -83,19 +82,19 @@ def testGraph2():
 	return g
 
 if __name__ == '__main__':
-	g = generate_random_strongly_connected_digraph(5, 10)
+	g = generateRandomStronglyConnectedDigraph(5, 10)
 	# draw graph with wages, vertices on circle
 
 	pos = nx.circular_layout(g)
 	nx.draw(g, pos, with_labels=True)
 	edge_labels=dict([((u,v,),d['weight'])
-				for u,v,d in g.edges(data=True)])
+    for u,v,d in g.edges(data=True)])
 	nx.draw_networkx_edge_labels(g, pos, edge_labels=edge_labels, label_pos=0.3, font_size=7)
 	plt.savefig('lab4_zad3.png')
 
 	source = 0
 
-	bl_dic = bellman_ford(g, source)
+	bl_dic = bellmanFord(g, source)
 
 	if bl_dic is not None:
 		for k, v in bl_dic.items():
