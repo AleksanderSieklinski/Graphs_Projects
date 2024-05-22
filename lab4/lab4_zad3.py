@@ -69,7 +69,6 @@ def bellmanFord(g, source):
 def testGraph2():
 	g = nx.DiGraph()
 	g.add_nodes_from(range(5))
-	# set vertex index start to 0
 	g.add_edge(0, 2, weight=1)
 	g.add_edge(0, 4, weight=4)
 	g.add_edge(0, 3, weight=4)
