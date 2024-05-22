@@ -13,7 +13,7 @@ def createFlowNetwork(N, displayBasicFlowNetwork=False):
 
     for _ in range(N):
         sizesOfClusters.append(random.randrange(2,N+1)) #  from 2 to N in each cluster
-
+        
     sizesOfClusters.append(1) # sink
     
     nodes = [] # list of nodes in each cluster
@@ -23,6 +23,7 @@ def createFlowNetwork(N, displayBasicFlowNetwork=False):
         for _ in range(sizesOfClusters[i]):
             nodes[i].append(nodeIter)
             nodeIter += 1
+        # random.shuffle(nodes[i])
 
     G = nx.DiGraph()
     for i in range(len(nodes)):

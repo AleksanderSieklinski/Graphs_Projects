@@ -48,7 +48,7 @@ def bellmanFord(g, source):
 	for edge in edges:
 		u, w, data = edge
 		if v[u][0] + data['weight'] < v[w][0]:
-			#find negative weight cycle
+			# find negative weight cycle
 			print("Graph contains a negative weight cycle:")
 			visited = [False] * v_mod
 			visited[w] = True
@@ -65,23 +65,24 @@ def bellmanFord(g, source):
 			return None
 	return v
 
-
-def testGraph2():
+def testGraph():
 	g = nx.DiGraph()
 	g.add_nodes_from(range(5))
-	g.add_edge(0, 2, weight=1)
-	g.add_edge(0, 4, weight=4)
-	g.add_edge(0, 3, weight=4)
-	g.add_edge(0, 5, weight=9)
-	g.add_edge(1, 2, weight=9)
-	g.add_edge(2, 4, weight=7)
-	g.add_edge(3, 4, weight=9)
-	g.add_edge(3, 5, weight=4)
-	g.add_edge(4, 5, weight=7)
+	g.add_edge(0, 1, weight=6)
+	g.add_edge(0, 2, weight=7)
+	g.add_edge(1, 2, weight=8)
+	g.add_edge(1, 3, weight=5)
+	g.add_edge(1, 4, weight=-4)
+	g.add_edge(2, 3, weight=-3)
+	g.add_edge(2, 4, weight=9)
+	g.add_edge(3, 1, weight=-2)
+	g.add_edge(3, 4, weight=7)
+
 	return g
 
 if __name__ == '__main__':
-	g = generateRandomStronglyConnectedDigraph(5, 10)
+	g = generateRandomStronglyConnectedDigraph(7, 15)
+	# g = testGraph()
 	# draw graph with wages, vertices on circle
 
 	pos = nx.circular_layout(g)
